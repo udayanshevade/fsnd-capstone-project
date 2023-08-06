@@ -21,3 +21,18 @@ def get_actors():
     abort(500, 'Internal server error')
   finally:
     db.session.close
+
+@actors_blueprint.route('/actors/<int:actor_id>', methods=['GET'])
+def get_actor(payload, actor_id: int):
+  try:
+    print('Request - [GET] /actors/<int:actor_id>')
+    actor = Actor.query.get(actor_id)
+    return jsonify({
+      'success': True,
+      'actor': actor,
+    }), 200
+  except Exception as e:
+    print('Error - [GET] /actors/<int:actor_id>', e)
+    abort(500, 'Internal server error')
+  finally:
+    db.session.close()

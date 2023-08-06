@@ -21,4 +21,19 @@ def get_movies():
     print('Error - [GET] /movies', e)
     abort(500, 'Internal server error')
   finally:
-    db.session.close
+    db.session.close()
+
+@movies_blueprint.route('/movies/<int:movie_id>', methods=['GET'])
+def get_movie(payload, movie_id: int):
+  try:
+    print('Request - [GET] /movies/<int:movie_id>')
+    movie = Movie.query.get(movie_id)
+    return jsonify({
+      'success': True,
+      'movie': movie,
+    }), 200
+  except Exception as e:
+    print('Error - [GET] /movies/<int:movie_id>', e)
+    abort(500, 'Internal server error')
+  finally:
+    db.session.close()
