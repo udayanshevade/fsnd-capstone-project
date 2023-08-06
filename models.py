@@ -1,22 +1,32 @@
-from sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from dotenv import dotenv_values
 
 db = SQLAlchemy()
 
 config = dotenv_values(".env")
 
-database_host = config['DATABASE_HOST']
-database_name = config['DATABASE_NAME']
-database_path = "postgresql://{}/{}".format(database_host, database_name)
+db_user = getattr(config, 'DB_USER', 'postgres')
+db_password = getattr(config, 'DB_PASSWORD', 'password')
+db_host = getattr(config, 'DB_HOST', 'localhost')
+db_name = getattr(config, 'DB_NAME', 'castingagency')
+db_path = "postgresql://{}:{}@{}/{}".format(db_user, db_password, db_host, db_name)
 
-def setup_db(app, database_path = database_path):
-  app.config["SQLALCHEMY_DATABASE_URI"] = database_path
+def configure_app(app, db_path:str=db_path):
+  """Configures the app with the provided settings"""
+  app.config["SQLALCHEMY_DATABASE_URI"] = db_path
+
+
+def setup_db(app, db_path:str=db_path, drop_db:bool=False):
+  """Initialize the database using the provided app instance and options"""
+  configure_app(app, db_path=db_path)
+
+  app.db = db
   db.app = app
   db.init_app(app)
-  db.create_all()
 
-migrate = Migrate(db.app, db)
+  with app.app_context():
+    if drop_db: db.drop_all()
+    db.create_all()
 
 class Movie(db.Model):
   __tablename__ = "movies"

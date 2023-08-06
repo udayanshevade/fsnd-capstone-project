@@ -1,16 +1,30 @@
 from flask import Flask
 from flask_cors import CORS
-from models import setup_db
+from flask_migrate import Migrate
+from models import db, setup_db
+from actors.routes import actors_blueprint
+from movies.routes import movies_blueprint
 
-def create_app(test_config=None):
+def create_app(db_path:str=None, drop_db:bool=False):
   # create and configure the app
-  _app = Flask(__name__)
-  setup_db(_app)
-  CORS(_app)
+  app = Flask(__name__)
+  
+  # setup middleware
+  CORS(app)
 
-  return _app
+  # initialize db
+  setup_db(app, db_path=db_path, drop_db=drop_db)
 
-app = create_app()
+  # register routes
+  app.register_blueprint(actors_blueprint)
+  app.register_blueprint(movies_blueprint)
+
+  return app
+
+def init_app():
+  app = create_app()
+  Migrate(app, db)
+  app.run(host='0.0.0.0', port=8080, debug=True)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+  init_app()
