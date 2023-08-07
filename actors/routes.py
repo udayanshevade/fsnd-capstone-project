@@ -1,5 +1,6 @@
 from flask import abort, Blueprint, jsonify
-from models import db, Actor
+from db import db
+from models import Actor
 
 actors_blueprint = Blueprint(
   'actors_blueprint',
@@ -23,7 +24,7 @@ def get_actors():
     db.session.close
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['GET'])
-def get_actor(payload, actor_id: int):
+def get_actor(actor_id: int):
   try:
     print('Request - [GET] /actors/<int:actor_id>')
     actor = Actor.query.get(actor_id)

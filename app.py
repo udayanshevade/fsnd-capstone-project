@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, setup_db
+from db import db, setup_db
 from actors.routes import actors_blueprint
 from movies.routes import movies_blueprint
 
