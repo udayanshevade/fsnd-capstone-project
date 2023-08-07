@@ -15,7 +15,7 @@ def get_movies():
     movies = Movie.query.all()
     return jsonify({
       'success': True,
-      'movies': movies
+      'movies': [movie.format() for movie in movies]
     }), 200
   except Exception as e:
     print('Error - [GET] /movies', e)
@@ -30,7 +30,7 @@ def get_movie(movie_id: int):
     movie = Movie.query.get(movie_id)
     return jsonify({
       'success': True,
-      'movie': movie,
+      'movie': movie.format(),
     }), 200
   except Exception as e:
     print('Error - [GET] /movies/<int:movie_id>', e)

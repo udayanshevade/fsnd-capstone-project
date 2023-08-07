@@ -15,7 +15,7 @@ def get_actors():
     actors = Actor.query.all()
     return jsonify({
       'success': True,
-      'actors': actors
+      'actors': [actor.format() for actor in actors]
     }), 200
   except Exception as e:
     print('Error - [GET] /actors', e)
@@ -30,7 +30,7 @@ def get_actor(actor_id: int):
     actor = Actor.query.get(actor_id)
     return jsonify({
       'success': True,
-      'actor': actor,
+      'actor': actor.format(),
     }), 200
   except Exception as e:
     print('Error - [GET] /actors/<int:actor_id>', e)
