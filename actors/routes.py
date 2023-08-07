@@ -1,4 +1,5 @@
-from flask import abort, Blueprint, jsonify
+from flask import abort, Blueprint, jsonify, request
+from datetime import datetime
 from db import db
 from models import Actor
 
@@ -25,6 +26,7 @@ def get_actors():
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['GET'])
 def get_actor(actor_id: int):
+  """Handles GET requests for a single actor"""
   try:
     print('Request - [GET] /actors/<int:actor_id>')
     actor = Actor.query.get(actor_id)
@@ -34,6 +36,42 @@ def get_actor(actor_id: int):
     }), 200
   except Exception as e:
     print('Error - [GET] /actors/<int:actor_id>', e)
+    abort(500, 'Internal server error')
+  finally:
+    db.session.close()
+
+@actors_blueprint.route('/actors/<int:actor_id>', methods=['PATCH'])
+def update_actor(actor_id: int):
+  """Handles PATCH requests to update existing actors in the database"""
+  try:
+    print('Request - [PATCH] /actors/<int:actor_id>')
+    actor = Actor.query.get(actor_id)
+    if not actor:
+      abort(404)
+    body = request.get_json()
+
+    if 'name' in body:
+      actor.name = body['name']
+
+    if 'birthdate' in body:
+      birthdate = body['birthdate']
+      try:
+        birthdate = datetime.fromisoformat(birthdate)
+      except Exception as e:
+        print('Error - [PATCH] /actors/<int:actor_id>', e)
+        abort(400, 'Invalid birthdate')
+
+      actor.birthdate = body['birthdate']
+
+    # commit changes
+    actor.update()
+
+    return jsonify({
+      'success': True,
+      'actor': actor.format()
+    }), 200
+  except Exception as e:
+    print('Error - [PATCH] /actors/<int:actor_id>', e)
     abort(500, 'Internal server error')
   finally:
     db.session.close()

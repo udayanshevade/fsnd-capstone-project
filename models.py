@@ -14,6 +14,9 @@ class Movie(db.Model):
       'title': self.title,
       'description': self.description,
     }
+  
+  def update(self):
+    db.session.commit()
 
 class Actor(db.Model):
   __tablename__ = 'actors'
@@ -22,10 +25,13 @@ class Actor(db.Model):
   birthdate = db.Column(db.Date)
   def __repr__(self):
         return f'<Actor ID: {self.id}, name: {self.name}, birthdate: {self.birthdate}>'
-      
+
   def format(self):
     return {
       'id': self.id,
       'name': self.name,
       'birthdate': self.birthdate,
     }
+  
+  def update(self):
+    db.session.commit()

@@ -5,6 +5,8 @@ from app import create_app
 from db import db
 from test_data_factory import ActorFactory, MovieFactory
 
+birthdate_format = '%a, %d %b %Y %H:%M:%S GMT'
+
 class CastingAgencyTestCase(unittest.TestCase):
   """This class represents the actor test case"""
 
@@ -68,6 +70,24 @@ class CastingAgencyTestCase(unittest.TestCase):
     # expected actor
     self.assertEqual(actor, { 'id': expected_id, 'name': expected_name, 'birthdate': expected_birthdate })
 
+  def test_update_actor(self):
+    """Tests updating an existing actor"""
+    with self.app.app_context():
+      ActorFactory.create(name='Jamie Lee Curtis', birthdate='Sat, 22 Nov 1958 00:00:00 GMT')
+      db.session.commit()
+
+    id = 1
+    expected_name = 'Lindsay Lohan'
+    expected_birthdate = 'Wed, 02 Jul 1986 00:00:00 GMT'
+    patch_data = { 'name': expected_name, 'birthdate': datetime.strptime(expected_birthdate, birthdate_format).isoformat() }
+    res = self.client().patch('actors/{}'.format(id), json=patch_data)
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    actor = data['actor']
+    self.assertEqual(actor, { 'id': id, 'name': expected_name, 'birthdate': expected_birthdate })
+
   #  ------------------------------------------------------------------------
   #  Movies
   #  ------------------------------------------------------------------------
@@ -113,6 +133,34 @@ class CastingAgencyTestCase(unittest.TestCase):
     movie = data['movie']
     # expected movie
     self.assertEqual(movie, { 'id': expected_id, 'title': expected_title, 'description': expected_description })
+    
+  def test_update_movie(self):
+    """Tests updating an existing movie"""
+    with self.app.app_context():
+      MovieFactory.create(
+        title='Dawn of the Dead',
+        description=('During an escalating zombie epidemic, two Philadelphia '
+                     'SWAT team members, a traffic reporter and his TV '
+                     'executive girlfriend seek refuge in a secluded shopping '
+                     'mall.'))
+      db.session.commit()
+
+    id = 1
+    expected_title = 'Dawn of the Dead'
+    expected_description = ('A nurse, a policeman, a young married couple, '
+                            'a salesman and other survivors of a worldwide '
+                            'plague that is producing aggressive, flesh-eating '
+                            'zombies, take refuge in a mega Midwestern '
+                            'shopping mall.')
+    patch_data = { 'title': expected_title, 'description': expected_description }
+    res = self.client().patch('movies/{}'.format(id), json=patch_data)
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    movie = data['movie']
+    self.assertEqual(movie, { 'id': id, 'title': expected_title, 'description': expected_description })
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
