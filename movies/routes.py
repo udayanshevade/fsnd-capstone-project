@@ -2,6 +2,7 @@ from flask import abort, Blueprint, jsonify, request
 from datetime import datetime
 from db import db
 from models import Movie
+from auth import requires_auth
 
 
 movies_blueprint = Blueprint(
@@ -11,6 +12,7 @@ movies_blueprint = Blueprint(
 
 
 @movies_blueprint.route('/movies', methods=['GET'])
+@requires_auth(permission='get:movie')
 def get_movies():
     """Handles GET requests for all available movies."""
     try:
@@ -27,7 +29,36 @@ def get_movies():
         db.session.close()
 
 
+@movies_blueprint.route('/movies', methods=['POST'])
+@requires_auth(permission='post:movie')
+def create_movie():
+    """Handles POST requests to create a new movies"""
+    try:
+        print('Request - [POST] /movies')
+        body = request.get_json()
+
+        required_attrs = ('title', 'description')
+        if not all(attr in body for attr in required_attrs):
+            abort(400, 'Invalid request')
+
+        movie = Movie(title=body['title'], description=body['description'])
+
+        # add and commit
+        movie.insert()
+
+        return jsonify({
+            'success': True,
+            'movie': movie.format()
+        }), 200
+    except Exception as e:
+        print('Error - [POST] /movies', e)
+        abort(500, 'Internal server error')
+    finally:
+        db.session.close()
+
+
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['GET'])
+@requires_auth(permission='get:movie')
 def get_movie(movie_id: int):
     """Handles GET requests for a specified movie."""
     try:
@@ -45,6 +76,7 @@ def get_movie(movie_id: int):
 
 
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['PATCH'])
+@requires_auth(permission='patch:movie')
 def update_movie(movie_id: int):
     """Handles PATCH requests to update existing movies in the database"""
     try:
@@ -74,34 +106,8 @@ def update_movie(movie_id: int):
         db.session.close()
 
 
-@movies_blueprint.route('/movies', methods=['POST'])
-def create_movie():
-    """Handles POST requests to create a new movies"""
-    try:
-        print('Request - [POST] /movies')
-        body = request.get_json()
-
-        required_attrs = ('title', 'description')
-        if not all(attr in body for attr in required_attrs):
-            abort(400, 'Invalid request')
-
-        movie = Movie(title=body['title'], description=body['description'])
-
-        # add and commit
-        movie.insert()
-
-        return jsonify({
-            'success': True,
-            'movie': movie.format()
-        }), 200
-    except Exception as e:
-        print('Error - [POST] /movies', e)
-        abort(500, 'Internal server error')
-    finally:
-        db.session.close()
-
-
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['DELETE'])
+@requires_auth(permission='delete:movie')
 def delete_movie(movie_id: int):
     """Handles DELETE requests to remove existing movies in the database"""
     try:

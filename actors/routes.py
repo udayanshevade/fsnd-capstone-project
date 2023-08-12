@@ -2,6 +2,7 @@ from flask import abort, Blueprint, jsonify, request
 from datetime import datetime
 from db import db
 from models import Actor
+from auth import requires_auth
 
 
 actors_blueprint = Blueprint(
@@ -11,6 +12,7 @@ actors_blueprint = Blueprint(
 
 
 @actors_blueprint.route('/actors', methods=['GET'])
+@requires_auth(permission='get:actor')
 def get_actors():
     """Handles GET requests for all available actors."""
     try:
@@ -28,6 +30,7 @@ def get_actors():
 
 
 @actors_blueprint.route('/actors', methods=['POST'])
+@requires_auth(permission='post:actor')
 def create_actor():
     """Handles POST requests to create a new actor"""
     try:
@@ -55,6 +58,7 @@ def create_actor():
 
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['GET'])
+@requires_auth(permission='get:actor')
 def get_actor(actor_id: int):
     """Handles GET requests for a single actor"""
     try:
@@ -72,6 +76,7 @@ def get_actor(actor_id: int):
 
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['PATCH'])
+@requires_auth(permission='patch:actor')
 def update_actor(actor_id: int):
     """Handles PATCH requests to update existing actors in the database"""
     try:
@@ -109,6 +114,7 @@ def update_actor(actor_id: int):
 
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['DELETE'])
+@requires_auth(permission='delete:actor')
 def delete_actor(actor_id: int):
     """Handles DELETE requests to remove existing actors in the database"""
     try:

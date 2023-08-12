@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from db import db, setup_db
 from actors.routes import actors_blueprint
 from movies.routes import movies_blueprint
+from errors import app_error_handling
 
 
 def create_app(db_path: str = None, drop_db: bool = False):
@@ -19,6 +20,8 @@ def create_app(db_path: str = None, drop_db: bool = False):
     # register routes
     app.register_blueprint(actors_blueprint)
     app.register_blueprint(movies_blueprint)
+
+    app_error_handling(app)
 
     return app
 
