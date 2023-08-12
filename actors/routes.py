@@ -64,6 +64,10 @@ def get_actor(actor_id: int):
     try:
         print('Request - [GET] /actors/<int:actor_id>')
         actor = Actor.query.get(actor_id)
+
+        if not actor:
+            abort(404)
+
         return jsonify({
             'success': True,
             'actor': actor.format(),

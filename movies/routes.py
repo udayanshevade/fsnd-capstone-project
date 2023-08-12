@@ -64,6 +64,10 @@ def get_movie(movie_id: int):
     try:
         print('Request - [GET] /movies/<int:movie_id>')
         movie = Movie.query.get(movie_id)
+        
+        if not movie:
+            abort(404)
+
         return jsonify({
             'success': True,
             'movie': movie.format(),
