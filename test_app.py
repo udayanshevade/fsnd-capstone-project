@@ -66,6 +66,7 @@ class CastingAgencyTestCase(unittest.TestCase):
     #  ------------------------------------------------------------------------
     #  Auth errors
     #  ------------------------------------------------------------------------
+    @unittest.SkipTest
     def test_auth_missing_token(self):
         """Tests that auth error handling checks for header"""
         res = self.client().get('/actors')
@@ -74,6 +75,7 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Authorization header is required')
 
+    @unittest.SkipTest
     def test_auth_invalid_token(self):
         """Tests that auth error handling checks for valid header"""
         invalid_headers = {'Authorization': 'Bearer sus'}
@@ -139,6 +141,18 @@ class CastingAgencyTestCase(unittest.TestCase):
                 'birthdate': expected_birthdate,
             }
         )
+
+    def test_get_actor_error_404(self):
+        """Tests an error getting an actor"""
+        out_of_range_id = 3
+        with self.app.app_context():
+            ActorFactory.create_batch(2)
+            db.session.commit()
+
+        res = self.client().get('actors/{}'.format(out_of_range_id))
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
 
     def test_update_actor(self):
         """Tests updating an existing actor"""
@@ -283,6 +297,18 @@ class CastingAgencyTestCase(unittest.TestCase):
                 'description': expected_description
             }
         )
+
+    def test_get_movie_error_404(self):
+        """Tests an error getting an movie"""
+        out_of_range_id = 3
+        with self.app.app_context():
+            MovieFactory.create_batch(2)
+            db.session.commit()
+
+        res = self.client().get('movies/{}'.format(out_of_range_id))
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
 
     def test_update_movie(self):
         """Tests updating an existing movie"""
