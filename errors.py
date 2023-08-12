@@ -5,7 +5,7 @@ from auth import AuthError
 # Error Handling
 def app_error_handling(app):
     @app.errorhandler(422)
-    def unprocessable():
+    def unprocessable(self):
         return jsonify({
             "success": False,
             "error": 422,
@@ -14,7 +14,7 @@ def app_error_handling(app):
 
 
     @app.errorhandler(404)
-    def unreachable():
+    def unreachable(self):
         return jsonify({
             'success': False,
             'error': 404,
@@ -23,8 +23,7 @@ def app_error_handling(app):
 
 
     @app.errorhandler(AuthError)
-    def handle_auth_error(error: AuthError):
-        print(error)
+    def handle_auth_error(self, error: AuthError):
         return jsonify({
             'success': False,
             'error': error.status_code,
