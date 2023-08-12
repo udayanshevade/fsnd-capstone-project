@@ -261,6 +261,17 @@ class CastingAgencyTestCase(unittest.TestCase):
         removed = data['removed']
         self.assertEqual(removed, id)
 
+    def test_delete_actor_404(self):
+        """Tests an error while deleting an actor"""
+        with self.app.app_context():
+            ActorFactory.create()
+            db.session.commit()
+        out_of_range_id = 2
+        res = self.client().delete('actors/{}'.format(out_of_range_id))
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
     #  ------------------------------------------------------------------------
     #  Movies
     #  ------------------------------------------------------------------------
@@ -464,6 +475,17 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertNotIn('error', data)
         removed = data['removed']
         self.assertEqual(removed, id)
+
+    def test_delete_movie_404(self):
+        """Tests an error while deleting an movie"""
+        with self.app.app_context():
+            MovieFactory.create()
+            db.session.commit()
+        out_of_range_id = 2
+        res = self.client().delete('movies/{}'.format(out_of_range_id))
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
 
 
 # Make the tests conveniently executable
