@@ -187,6 +187,23 @@ class CastingAgencyTestCase(unittest.TestCase):
             }
         )
 
+    def test_update_actor_error_422(self):
+        """Tests an error while updating an actor"""
+        with self.app.app_context():
+            ActorFactory.create(
+                name='Jamie Lee Curtis',
+                birthdate='Sat, 22 Nov 1958 00:00:00 GMT')
+            db.session.commit()
+        id = 1
+        patch_data = {
+            'name': 'Lindsay Lohan',
+            'birthdate': ''
+        }
+        res = self.client().patch('actors/{}'.format(id), json=patch_data)
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+
     def test_create_actor(self):
         """Tests creating a new actor"""
         expected_name = 'Tommy Wiseau'
@@ -347,6 +364,33 @@ class CastingAgencyTestCase(unittest.TestCase):
                 'description': expected_description
             }
         )
+
+    def test_update_movie_error_404(self):
+        """Tests an error while updating a movie"""
+        with self.app.app_context():
+            MovieFactory.create(
+                title='Dawn of the Dead',
+                description=('During an escalating zombie epidemic, two '
+                             'Philadelphia SWAT team members, a traffic '
+                             'reporter and his TV executive girlfriend seek '
+                             'refuge in a secluded shopping mall.')
+            )
+            db.session.commit()
+        out_of_range_id = 2
+        patch_data = {
+            'title': 'Sharknado',
+            'description': ('When a freak hurricane swamps Los Angeles, '
+                            "nature's deadliest killer rules sea, land, and "
+                            'air as thousands of sharks terrorize the '
+                            'waterlogged populace.')
+        }
+        res = self.client().patch(
+            'actors/{}'.format(out_of_range_id),
+            json=patch_data
+        )
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
 
     def test_create_movie(self):
         """Tests creating a new movie"""

@@ -4,6 +4,14 @@ from auth import AuthError
 
 # Error Handling
 def app_error_handling(app):
+    @app.errorhandler(400)
+    def malformed(self):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "malformed"
+        })
+
     @app.errorhandler(422)
     def unprocessable(self):
         return jsonify({

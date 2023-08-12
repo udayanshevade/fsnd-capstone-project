@@ -104,7 +104,7 @@ def update_actor(actor_id: int):
                 birthdate = datetime.fromisoformat(birthdate)
             except Exception as e:
                 print('Error - [PATCH] /actors/<int:actor_id>', e)
-                abort(400, 'Invalid birthdate')
+                abort(422, 'Invalid birthdate')
 
         actor.birthdate = body['birthdate']
 
