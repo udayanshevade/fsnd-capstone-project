@@ -24,6 +24,34 @@ def get_actors():
   finally:
     db.session.close
 
+
+@actors_blueprint.route('/actors', methods=['POST'])
+def create_actor():
+  """Handles POST requests to create a new actor"""
+  try:
+    print('Request - [POST] /actors')
+    body = request.get_json()
+
+    required_attrs = ('name', 'birthdate')
+    if not all(attr in body for attr in required_attrs):
+      abort(400, 'Invalid request')
+
+    actor = Actor(name = body['name'], birthdate = body['birthdate'])
+
+    # add and commit
+    actor.insert()
+
+    return jsonify({
+      'success': True,
+      'actor': actor.format()
+    }), 200
+  except Exception as e:
+    print('Error - [POST] /actors', e)
+    abort(500, 'Internal server error')
+  finally:
+    db.session.close()
+
+
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['GET'])
 def get_actor(actor_id: int):
   """Handles GET requests for a single actor"""
@@ -39,6 +67,7 @@ def get_actor(actor_id: int):
     abort(500, 'Internal server error')
   finally:
     db.session.close()
+
 
 @actors_blueprint.route('/actors/<int:actor_id>', methods=['PATCH'])
 def update_actor(actor_id: int):
@@ -75,3 +104,26 @@ def update_actor(actor_id: int):
     abort(500, 'Internal server error')
   finally:
     db.session.close()
+
+
+@actors_blueprint.route('/actors/<int:actor_id>', methods=['DELETE'])
+def delete_actor(actor_id: int):
+  """Handles DELETE requests to remove existing actors in the database"""
+  try:
+    print('Request - [PATCH] /actors/<int:actor_id>')
+
+    actor = Actor.query.get(actor_id)
+
+    if not actor:
+      abort(404)
+
+    # remove and commit
+    actor.delete()
+
+    return jsonify({
+      'success': True,
+      'removed': actor_id
+    })
+  except Exception as e:
+    print('Error - [PATCH] /actors/<int:actor_id>', e)
+    abort(500, 'Internal server error')

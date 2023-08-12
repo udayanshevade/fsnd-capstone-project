@@ -88,6 +88,34 @@ class CastingAgencyTestCase(unittest.TestCase):
     actor = data['actor']
     self.assertEqual(actor, { 'id': id, 'name': expected_name, 'birthdate': expected_birthdate })
 
+  def test_create_actor(self):
+    """Tests creating a new actor"""
+    expected_name = 'Tommy Wiseau'
+    expected_birthdate = 'Tue, 22 Nov 1955 00:00:00 GMT'
+    post_data = { 'name': expected_name, 'birthdate': datetime.strptime(expected_birthdate, birthdate_format).isoformat() }
+    res = self.client().post('actors', json=post_data)
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    actor = data['actor']
+    self.assertEqual(actor, { 'id': 1, 'name': expected_name, 'birthdate': expected_birthdate })
+
+  def test_delete_actor(self):
+    """Tests deleting a actor"""
+    with self.app.app_context():
+      ActorFactory.create(name='Jamie Lee Curtis', birthdate='Sat, 22 Nov 1958 00:00:00 GMT')
+      ActorFactory.create(name='Tommy Wiseau', birthdate='Sat, 22 Nov 1955 00:00:00 GMT')
+      db.session.commit()
+    id = 2
+    res = self.client().delete('actors/{}'.format(id))
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    removed = data['removed']
+    self.assertEqual(removed, id)
+
   #  ------------------------------------------------------------------------
   #  Movies
   #  ------------------------------------------------------------------------
@@ -161,6 +189,42 @@ class CastingAgencyTestCase(unittest.TestCase):
     movie = data['movie']
     self.assertEqual(movie, { 'id': id, 'title': expected_title, 'description': expected_description })
 
+  def test_create_movie(self):
+    """Tests creating a new movie"""
+    expected_title = 'The Room'
+    expected_description = ("In San Francisco, an amiable banker's seemingly"
+                            "perfect life is turned upside down when his"
+                            "deceitful fiancée embarks on an affair with his"
+                            "best friend.")
+    post_data = { 'title': expected_title, 'description': expected_description }
+    res = self.client().post('movies', json=post_data)
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    movie = data['movie']
+    self.assertEqual(movie, { 'id': 1, 'title': expected_title, 'description': expected_description })
+    
+  def test_delete_movie(self):
+    """Tests deleting a movie"""
+    with self.app.app_context():
+      MovieFactory.create(title='Dawn of the Dead', description=('During an escalating zombie epidemic, two Philadelphia '
+                     'SWAT team members, a traffic reporter and his TV '
+                     'executive girlfriend seek refuge in a secluded shopping '
+                     'mall.'))
+      MovieFactory.create(title='The Room', description=("In San Francisco, an amiable banker's seemingly"
+                            "perfect life is turned upside down when his"
+                            "deceitful fiancée embarks on an affair with his"
+                            "best friend."))
+      db.session.commit()
+    id = 2
+    res = self.client().delete('movies/{}'.format(id))
+    data = loads(res.data)
+    self.assertEqual(res.status_code, 200)
+    self.assertEqual(data['success'], True)
+    self.assertNotIn('error', data)
+    removed = data['removed']
+    self.assertEqual(removed, id)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
