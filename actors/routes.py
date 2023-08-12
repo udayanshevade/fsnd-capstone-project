@@ -2,7 +2,7 @@ from flask import abort, Blueprint, jsonify, request
 from datetime import datetime
 from db import db
 from models import Actor
-from auth import requires_auth
+# from auth import requires_auth
 
 
 actors_blueprint = Blueprint(
@@ -24,7 +24,8 @@ def get_actors():
         }), 200
     except Exception as e:
         print('Error - [GET] /actors', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close
 
@@ -52,7 +53,8 @@ def create_actor():
         }), 200
     except Exception as e:
         print('Error - [POST] /actors', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -74,7 +76,8 @@ def get_actor(actor_id: int):
         }), 200
     except Exception as e:
         print('Error - [GET] /actors/<int:actor_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -86,8 +89,10 @@ def update_actor(actor_id: int):
     try:
         print('Request - [PATCH] /actors/<int:actor_id>')
         actor = Actor.query.get(actor_id)
+
         if not actor:
             abort(404)
+
         body = request.get_json()
 
         if 'name' in body:
@@ -112,7 +117,8 @@ def update_actor(actor_id: int):
         }), 200
     except Exception as e:
         print('Error - [PATCH] /actors/<int:actor_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -138,6 +144,7 @@ def delete_actor(actor_id: int):
         })
     except Exception as e:
         print('Error - [PATCH] /actors/<int:actor_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()

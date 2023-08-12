@@ -1,8 +1,7 @@
 from flask import abort, Blueprint, jsonify, request
-from datetime import datetime
 from db import db
 from models import Movie
-from auth import requires_auth
+# from auth import requires_auth
 
 
 movies_blueprint = Blueprint(
@@ -24,7 +23,8 @@ def get_movies():
         }), 200
     except Exception as e:
         print('Error - [GET] /movies', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -52,7 +52,8 @@ def create_movie():
         }), 200
     except Exception as e:
         print('Error - [POST] /movies', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -74,7 +75,8 @@ def get_movie(movie_id: int):
         }), 200
     except Exception as e:
         print('Error - [GET] /movies/<int:movie_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -86,8 +88,10 @@ def update_movie(movie_id: int):
     try:
         print('Request - [PATCH] /movies/<int:movie_id>')
         movie = Movie.query.get(movie_id)
+
         if not movie:
             abort(404)
+
         body = request.get_json()
 
         if 'title' in body:
@@ -105,7 +109,8 @@ def update_movie(movie_id: int):
         }), 200
     except Exception as e:
         print('Error - [PATCH] /movies/<int:movie_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
 
@@ -131,6 +136,7 @@ def delete_movie(movie_id: int):
         })
     except Exception as e:
         print('Error - [PATCH] /movies/<int:movie_id>', e)
-        abort(500, 'Internal server error')
+        code = getattr(e, 'code', 500)
+        abort(code)
     finally:
         db.session.close()
