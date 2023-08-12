@@ -40,7 +40,7 @@ def create_actor():
 
         required_attrs = ('name', 'birthdate')
         if not all(attr in body for attr in required_attrs):
-            abort(400, 'Invalid request')
+            abort(400)
 
         actor = Actor(name=body['name'], birthdate=body['birthdate'])
 

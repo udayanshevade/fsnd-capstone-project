@@ -39,7 +39,7 @@ def create_movie():
 
         required_attrs = ('title', 'description')
         if not all(attr in body for attr in required_attrs):
-            abort(400, 'Invalid request')
+            abort(400)
 
         movie = Movie(title=body['title'], description=body['description'])
 

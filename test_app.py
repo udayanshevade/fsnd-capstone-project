@@ -230,6 +230,16 @@ class CastingAgencyTestCase(unittest.TestCase):
             }
         )
 
+    def test_create_actor_400(self):
+        """Tests an error while creating an actor"""
+        post_data = {
+            'name': 'Chuck Norris',
+        }
+        res = self.client().post('actors', json=post_data)
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+
     def test_delete_actor(self):
         """Tests deleting a actor"""
         with self.app.app_context():
@@ -403,7 +413,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             'title': expected_title,
             'description': expected_description
         }
-        res = self.client().post('movies', json=post_data)
+        res = self.client().post('/movies', json=post_data)
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -417,6 +427,16 @@ class CastingAgencyTestCase(unittest.TestCase):
                 'description': expected_description,
             }
         )
+
+    def test_create_movie_400(self):
+        """Tests an error while creating a movie"""
+        post_data = {
+            'title': 'Batgirl',
+        }
+        res = self.client().post('/movies', json=post_data)
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
 
     def test_delete_movie(self):
         """Tests deleting a movie"""

@@ -10,7 +10,7 @@ def app_error_handling(app):
             "success": False,
             "error": 400,
             "message": "malformed"
-        })
+        }), 400
 
     @app.errorhandler(422)
     def unprocessable(self):
