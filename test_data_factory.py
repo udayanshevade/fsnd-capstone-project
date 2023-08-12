@@ -4,6 +4,7 @@ from db import db
 
 class ActorFactory(factory.alchemy.SQLAlchemyModelFactory):
   """Factory for generating mocked Actor instances for testing"""
+
   class Meta:
     model = Actor
     sqlalchemy_session = db.session
@@ -11,7 +12,9 @@ class ActorFactory(factory.alchemy.SQLAlchemyModelFactory):
   name = factory.Faker('name')
   birthdate = factory.Faker('date')
 
+
 class MovieFactory(factory.alchemy.SQLAlchemyModelFactory):
+
   """Factory for generating mocked Movie instances for testing"""
   class Meta:
     model = Movie
