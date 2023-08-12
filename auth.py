@@ -82,7 +82,13 @@ def check_permissions(permission: str, payload: str):
 
 
 def verify_decode_jwt(token):
-    unverified_header = jwt.get_unverified_header(token)
+    try:
+        unverified_header = jwt.get_unverified_header(token)
+    except Exception as e:
+        raise AuthError({
+            'code': 'invalid_header',
+            'description': 'Authorization malformed'
+        }, 401)
     if 'kid' not in unverified_header:
         raise AuthError({
             'code': 'invalid_header',

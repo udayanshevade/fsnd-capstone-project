@@ -4,8 +4,38 @@ from datetime import datetime
 from app import create_app
 from db import db
 from test_data_factory import ActorFactory, MovieFactory
+from dotenv import dotenv_values
 
 birthdate_format = '%a, %d %b %Y %H:%M:%S GMT'
+
+config = dotenv_values(".env")
+
+
+def get_headers_for_casting_assistant():
+    """Test auth token for read-only endpoints"""
+    return {
+        'Authorization': 'Bearer ' + getattr(
+            config, 'CASTING_ASSISTANT_AUTH_TOKEN', '')
+    }
+
+
+def get_headers_for_casting_director():
+    """Test auth token: CRUD for actors, RU for movies"""
+    return {
+        'Authorization': 'Bearer ' + getattr(
+            config, 'CASTING_DIRECTOR_AUTH_TOKEN', '')
+    }
+
+
+def get_headers_for_executive_producer():
+    """
+    Test auth token with all permissions
+    (using this as default for testing endpoints)
+    """
+    return {
+        'Authorization': 'Bearer ' + getattr(
+            config, 'EXECUTIVE_PRODUCER_AUTH_TOKEN', '')
+    }
 
 
 class CastingAgencyTestCase(unittest.TestCase):
@@ -32,6 +62,26 @@ class CastingAgencyTestCase(unittest.TestCase):
         with self.app.app_context():
             db.session.rollback()
             pass
+
+    #  ------------------------------------------------------------------------
+    #  Auth errors
+    #  ------------------------------------------------------------------------
+    def test_auth_missing_token(self):
+        """Tests that auth error handling checks for header"""
+        res = self.client().get('/actors')
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Authorization header is required')
+
+    def test_auth_invalid_token(self):
+        """Tests that auth error handling checks for valid header"""
+        invalid_headers = {'Authorization': 'Bearer sus'}
+        res = self.client().get('/actors', headers=invalid_headers)
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Authorization malformed')
 
     #  ------------------------------------------------------------------------
     #  Actors
