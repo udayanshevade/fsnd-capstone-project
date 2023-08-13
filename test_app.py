@@ -543,6 +543,127 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
 
+    #  ------------------------------------------------------------------------
+    #  RBAC tests
+    #  ------------------------------------------------------------------------
+    def test_assistant_role_can_get_data(self):
+        """Tests that the assistant role has read permissions"""
+        with self.app.app_context():
+            ActorFactory.create()
+            MovieFactory.create()
+            db.session.commit()
+        headers = get_headers_for_casting_assistant()
+        actors_res = self.client().get('/actors', headers=headers)
+        self.assertEqual(actors_res.status_code, 200)
+        movies_res = self.client().get('/movies', headers=headers)
+        self.assertEqual(movies_res.status_code, 200)
+
+    def test_assistant_role_cannot_post_data(self):
+        """
+        Tests that the assistant role doesn't have permissions to post data
+        """
+        actor_data = {
+            'name': 'Marlon Rando',
+            'birthdate': datetime.strptime(
+                'Tue, 01 Aug 2023 00:00:00 GMT',
+                birthdate_format
+            ).isoformat()
+        }
+        headers = get_headers_for_casting_assistant()
+        actors_res = self.client().post('/actors', json=actor_data, headers=headers)
+        self.assertEqual(actors_res.status_code, 401)
+        movie_data = { 'title': 'Random', 'description': 'This is a random movie' }
+        movies_res = self.client().post('/movies', json=movie_data, headers=headers)
+        self.assertEqual(movies_res.status_code, 401)
+
+    def test_director_role_can_crud_actor_data(self):
+        """Tests that the director role has CRUD permissions for actor data"""
+        with self.app.app_context():
+            ActorFactory.create()
+            db.session.commit()
+        headers = get_headers_for_casting_director()
+
+        read_res = self.client().get('/actors', headers=headers)
+        self.assertEqual(read_res.status_code, 200)
+
+        post_data = {
+            'name': 'Marlon Rando',
+            'birthdate': datetime.strptime(
+                'Tue, 01 Aug 2023 00:00:00 GMT',
+                birthdate_format
+            ).isoformat()
+        }
+        post_res = self.client().post(
+            '/actors',
+            json=post_data,
+            headers=headers
+        )
+        self.assertEqual(post_res.status_code, 200)
+
+        patch_data = {
+            'name': 'Marlin Rando',
+            'birthdate': datetime.strptime(
+                'Wed, 02 Aug 2023 00:00:00 GMT',
+                birthdate_format
+            ).isoformat()
+        }
+        patch_res = self.client().patch(
+            '/actors/2',
+            json=patch_data,
+            headers=headers
+        )
+
+        self.assertEqual(patch_res.status_code, 200)
+
+        delete_res = self.client().delete('/actors/1', headers=headers)
+        self.assertEqual(delete_res.status_code, 200)
+
+    def test_director_role_can_only_read_and_update_movie_data(self):
+        """
+        Tests that the director role has limited R+U permissions for movies
+        """
+        with self.app.app_context():
+            MovieFactory.create(
+                title='Halloween',
+                description=(
+                    'Fifteen years after murdering his sister on Halloween '
+                    'night 1963, Michael Myers escapes from a mental hospital '
+                    'and returns to the small town of Haddonfield, Illinois '
+                    'to kill again.'
+                )
+            )
+            db.session.commit()
+        headers = get_headers_for_casting_director()
+
+        read_res = self.client().get('/movies', headers=headers)
+        self.assertEqual(read_res.status_code, 200)
+
+        post_data = {
+            'title': 'Random Movie',
+            'description': "This is a random movie that won't get made"
+        }
+        post_res = self.client().post(
+            '/movies',
+            json=post_data,
+            headers=headers
+        )
+        self.assertEqual(post_res.status_code, 401)
+
+        patch_data = {
+            'title': 'Halloween',
+            'description': (
+                'This is now a new reboot of the classic horror franchise.'
+            )
+        }
+        patch_res = self.client().patch(
+            '/movies/1',
+            json=patch_data,
+            headers=headers
+        )
+        self.assertEqual(patch_res.status_code, 200)
+
+        delete_res = self.client().delete('/movies/1', headers=headers)
+        self.assertEqual(delete_res.status_code, 401)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
