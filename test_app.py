@@ -83,6 +83,18 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Authorization malformed')
 
+    def test_expired_token(self):
+        """Tests that token expiry is checked"""
+        expired_auth_token = config.get('EXPIRED_AUTH_TOKEN')
+        invalid_headers = {
+            'Authorization': f'Bearer {expired_auth_token}'
+        }
+        res = self.client().get('/actors', headers=invalid_headers)
+        data = loads(res.data)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Token has expired')
+
     #  ------------------------------------------------------------------------
     #  Actors
     #  ------------------------------------------------------------------------
