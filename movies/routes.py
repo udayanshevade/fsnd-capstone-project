@@ -1,7 +1,7 @@
 from flask import abort, Blueprint, jsonify, request
 from db import db
 from models import Movie
-# from auth import requires_auth
+from auth import requires_auth
 
 
 movies_blueprint = Blueprint(
@@ -11,8 +11,8 @@ movies_blueprint = Blueprint(
 
 
 @movies_blueprint.route('/movies', methods=['GET'])
-# @requires_auth(permission='get:movie')
-def get_movies():
+@requires_auth(permission='get:movies')
+def get_movies(self):
     """Handles GET requests for all available movies."""
     try:
         print('Request - [GET] /movies')
@@ -30,8 +30,8 @@ def get_movies():
 
 
 @movies_blueprint.route('/movies', methods=['POST'])
-# @requires_auth(permission='post:movie')
-def create_movie():
+@requires_auth(permission='post:movies')
+def create_movie(self):
     """Handles POST requests to create a new movies"""
     try:
         print('Request - [POST] /movies')
@@ -59,8 +59,8 @@ def create_movie():
 
 
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['GET'])
-# @requires_auth(permission='get:movie')
-def get_movie(movie_id: int):
+@requires_auth(permission='get:movies')
+def get_movie(self, movie_id: int):
     """Handles GET requests for a specified movie."""
     try:
         print('Request - [GET] /movies/<int:movie_id>')
@@ -82,8 +82,8 @@ def get_movie(movie_id: int):
 
 
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['PATCH'])
-# @requires_auth(permission='patch:movie')
-def update_movie(movie_id: int):
+@requires_auth(permission='patch:movies')
+def update_movie(self, movie_id: int):
     """Handles PATCH requests to update existing movies in the database"""
     try:
         print('Request - [PATCH] /movies/<int:movie_id>')
@@ -116,8 +116,8 @@ def update_movie(movie_id: int):
 
 
 @movies_blueprint.route('/movies/<int:movie_id>', methods=['DELETE'])
-# @requires_auth(permission='delete:movie')
-def delete_movie(movie_id: int):
+@requires_auth(permission='delete:movies')
+def delete_movie(self, movie_id: int):
     """Handles DELETE requests to remove existing movies in the database"""
     try:
         print('Request - [PATCH] /movies/<int:movie_id>')

@@ -31,7 +31,7 @@ def app_error_handling(app):
 
 
     @app.errorhandler(AuthError)
-    def handle_auth_error(self, error: AuthError):
+    def handle_auth_error(error: AuthError):
         return jsonify({
             'success': False,
             'error': error.status_code,

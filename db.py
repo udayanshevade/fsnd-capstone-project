@@ -7,10 +7,10 @@ db = SQLAlchemy()
 
 def get_db_path():
     config = dotenv_values(".env")
-    db_user = getattr(config, 'DB_USER', 'postgres')
-    db_password = getattr(config, 'DB_PASSWORD', 'password')
-    db_host = getattr(config, 'DB_HOST', 'localhost')
-    db_name = getattr(config, 'DB_NAME', 'castingagency')
+    db_user = config.get('DB_USER', 'postgres')
+    db_password = config.get('DB_PASSWORD', 'password')
+    db_host = config.get('DB_HOST', 'localhost')
+    db_name = config.get('DB_NAME', 'castingagency')
     db_path = "postgresql://{}:{}@{}/{}".format(
         db_user,
         db_password,

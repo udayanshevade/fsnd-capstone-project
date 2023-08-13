@@ -13,17 +13,17 @@ config = dotenv_values(".env")
 
 def get_headers_for_casting_assistant():
     """Test auth token for read-only endpoints"""
+    auth_token = config.get('CASTING_ASSISTANT_AUTH_TOKEN', '')
     return {
-        'Authorization': 'Bearer ' + getattr(
-            config, 'CASTING_ASSISTANT_AUTH_TOKEN', '')
+        'Authorization': 'Bearer ' + auth_token
     }
 
 
 def get_headers_for_casting_director():
     """Test auth token: CRUD for actors, RU for movies"""
+    auth_token = config.get('CASTING_DIRECTOR_AUTH_TOKEN', '')
     return {
-        'Authorization': 'Bearer ' + getattr(
-            config, 'CASTING_DIRECTOR_AUTH_TOKEN', '')
+        'Authorization': 'Bearer ' + auth_token
     }
 
 
@@ -32,9 +32,9 @@ def get_headers_for_executive_producer():
     Test auth token with all permissions
     (using this as default for testing endpoints)
     """
+    auth_token = config.get('EXECUTIVE_PRODUCER_AUTH_TOKEN', '')
     return {
-        'Authorization': 'Bearer ' + getattr(
-            config, 'EXECUTIVE_PRODUCER_AUTH_TOKEN', '')
+        'Authorization': 'Bearer ' + auth_token
     }
 
 
@@ -66,7 +66,6 @@ class CastingAgencyTestCase(unittest.TestCase):
     #  ------------------------------------------------------------------------
     #  Auth errors
     #  ------------------------------------------------------------------------
-    @unittest.SkipTest
     def test_auth_missing_token(self):
         """Tests that auth error handling checks for header"""
         res = self.client().get('/actors')
@@ -75,7 +74,6 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Authorization header is required')
 
-    @unittest.SkipTest
     def test_auth_invalid_token(self):
         """Tests that auth error handling checks for valid header"""
         invalid_headers = {'Authorization': 'Bearer sus'}
@@ -95,7 +93,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             ActorFactory.create_batch(num_actors_to_test)
             db.session.commit()
 
-        res = self.client().get('/actors')
+        res = self.client().get(
+            '/actors',
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -126,7 +127,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             )
             db.session.commit()
 
-        res = self.client().get('actors/{}'.format(expected_id))
+        res = self.client().get(
+            'actors/{}'.format(expected_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -149,7 +153,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             ActorFactory.create_batch(2)
             db.session.commit()
 
-        res = self.client().get('actors/{}'.format(out_of_range_id))
+        res = self.client().get(
+            'actors/{}'.format(out_of_range_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
@@ -172,7 +179,10 @@ class CastingAgencyTestCase(unittest.TestCase):
                 birthdate_format
             ).isoformat()
         }
-        res = self.client().patch('actors/{}'.format(id), json=patch_data)
+        res = self.client().patch(
+            'actors/{}'.format(id),
+            json=patch_data, headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -199,7 +209,11 @@ class CastingAgencyTestCase(unittest.TestCase):
             'name': 'Lindsay Lohan',
             'birthdate': ''
         }
-        res = self.client().patch('actors/{}'.format(id), json=patch_data)
+        res = self.client().patch(
+            'actors/{}'.format(id),
+            json=patch_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
@@ -215,7 +229,11 @@ class CastingAgencyTestCase(unittest.TestCase):
                 birthdate_format
             ).isoformat()
         }
-        res = self.client().post('actors', json=post_data)
+        res = self.client().post(
+            'actors',
+            json=post_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -235,7 +253,11 @@ class CastingAgencyTestCase(unittest.TestCase):
         post_data = {
             'name': 'Chuck Norris',
         }
-        res = self.client().post('actors', json=post_data)
+        res = self.client().post(
+            'actors',
+            json=post_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
@@ -253,7 +275,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             )
             db.session.commit()
         id = 2
-        res = self.client().delete('actors/{}'.format(id))
+        res = self.client().delete(
+            'actors/{}'.format(id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -267,7 +292,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             ActorFactory.create()
             db.session.commit()
         out_of_range_id = 2
-        res = self.client().delete('actors/{}'.format(out_of_range_id))
+        res = self.client().delete(
+            'actors/{}'.format(out_of_range_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
@@ -283,7 +311,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             MovieFactory.create_batch(num_movies_to_test)
             db.session.commit()
 
-        res = self.client().get('/movies')
+        res = self.client().get(
+            '/movies',
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -320,7 +351,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             )
             db.session.commit()
 
-        res = self.client().get('movies/{}'.format(expected_id))
+        res = self.client().get(
+            'movies/{}'.format(expected_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -343,7 +377,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             MovieFactory.create_batch(2)
             db.session.commit()
 
-        res = self.client().get('movies/{}'.format(out_of_range_id))
+        res = self.client().get(
+            'movies/{}'.format(out_of_range_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
@@ -371,7 +408,11 @@ class CastingAgencyTestCase(unittest.TestCase):
             'title': expected_title,
             'description': expected_description
         }
-        res = self.client().patch('movies/{}'.format(id), json=patch_data)
+        res = self.client().patch(
+            'movies/{}'.format(id),
+            json=patch_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -407,7 +448,8 @@ class CastingAgencyTestCase(unittest.TestCase):
         }
         res = self.client().patch(
             'actors/{}'.format(out_of_range_id),
-            json=patch_data
+            json=patch_data,
+            headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
         self.assertEqual(res.status_code, 404)
@@ -424,7 +466,11 @@ class CastingAgencyTestCase(unittest.TestCase):
             'title': expected_title,
             'description': expected_description
         }
-        res = self.client().post('/movies', json=post_data)
+        res = self.client().post(
+            '/movies',
+            json=post_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -444,7 +490,11 @@ class CastingAgencyTestCase(unittest.TestCase):
         post_data = {
             'title': 'Batgirl',
         }
-        res = self.client().post('/movies', json=post_data)
+        res = self.client().post(
+            '/movies',
+            json=post_data,
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 400)
         self.assertEqual(data['success'], False)
@@ -468,7 +518,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             )
             db.session.commit()
         id = 2
-        res = self.client().delete('movies/{}'.format(id))
+        res = self.client().delete(
+            'movies/{}'.format(id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -482,7 +535,10 @@ class CastingAgencyTestCase(unittest.TestCase):
             MovieFactory.create()
             db.session.commit()
         out_of_range_id = 2
-        res = self.client().delete('movies/{}'.format(out_of_range_id))
+        res = self.client().delete(
+            'movies/{}'.format(out_of_range_id),
+            headers=get_headers_for_executive_producer()
+        )
         data = loads(res.data)
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)

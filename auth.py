@@ -6,9 +6,9 @@ from urllib.request import urlopen
 from dotenv import dotenv_values
 
 config = dotenv_values(".env")
-AUTH0_DOMAIN = getattr('config', 'AUTH0_DOMAIN', None)
-ALGORITHMS = getattr('config', 'ALGORITHMS', ['RS256'])
-API_AUDIENCE = getattr('config', 'API_AUDIENCE', 'http://localhost:9876')
+AUTH0_DOMAIN = config.get('AUTH0_DOMAIN', None)
+ALGORITHMS = config.get('ALGORITHMS', ['RS256'])
+API_AUDIENCE = config.get('API_AUDIENCE', 'http://localhost:9876')
 
 # AuthError Exception
 '''
@@ -94,7 +94,8 @@ def verify_decode_jwt(token):
             'code': 'invalid_header',
             'description': 'Authorization malformed.'
         }, 401)
-    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
+    jsonurl = urlopen(url)
     jwks = json.loads(jsonurl.read())
     rsa_key = {}
     for key in jwks['keys']:
