@@ -9,7 +9,7 @@ def get_db_path():
     config = dotenv_values(".env")
     db_user = config.get('DB_USER', 'postgres')
     db_password = config.get('DB_PASSWORD', 'password')
-    db_host = config.get('DB_HOST', 'localhost')
+    db_host = config.get('DB_HOST', 'localhost:5432')
     db_name = config.get('DB_NAME', 'castingagency')
     db_path = "postgresql://{}:{}@{}/{}".format(
         db_user,

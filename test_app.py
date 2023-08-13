@@ -140,7 +140,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
 
         res = self.client().get(
-            'actors/{}'.format(expected_id),
+            f'actors/{expected_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -166,7 +166,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
 
         res = self.client().get(
-            'actors/{}'.format(out_of_range_id),
+            f'actors/{out_of_range_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -192,7 +192,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             ).isoformat()
         }
         res = self.client().patch(
-            'actors/{}'.format(id),
+            f'actors/{id}',
             json=patch_data, headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -222,7 +222,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             'birthdate': ''
         }
         res = self.client().patch(
-            'actors/{}'.format(id),
+            f'actors/{id}',
             json=patch_data,
             headers=get_headers_for_executive_producer()
         )
@@ -288,7 +288,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
         id = 2
         res = self.client().delete(
-            'actors/{}'.format(id),
+            f'actors/{id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -305,7 +305,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
         out_of_range_id = 2
         res = self.client().delete(
-            'actors/{}'.format(out_of_range_id),
+            f'actors/{out_of_range_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -364,7 +364,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
 
         res = self.client().get(
-            'movies/{}'.format(expected_id),
+            f'movies/{expected_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -390,7 +390,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
 
         res = self.client().get(
-            'movies/{}'.format(out_of_range_id),
+            f'movies/{out_of_range_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -421,7 +421,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             'description': expected_description
         }
         res = self.client().patch(
-            'movies/{}'.format(id),
+            f'movies/{id}',
             json=patch_data,
             headers=get_headers_for_executive_producer()
         )
@@ -459,7 +459,7 @@ class CastingAgencyTestCase(unittest.TestCase):
                             'waterlogged populace.')
         }
         res = self.client().patch(
-            'actors/{}'.format(out_of_range_id),
+            f'actors/{out_of_range_id}',
             json=patch_data,
             headers=get_headers_for_executive_producer()
         )
@@ -531,7 +531,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
         id = 2
         res = self.client().delete(
-            'movies/{}'.format(id),
+            f'movies/{id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -548,7 +548,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db.session.commit()
         out_of_range_id = 2
         res = self.client().delete(
-            'movies/{}'.format(out_of_range_id),
+            f'movies/{out_of_range_id}',
             headers=get_headers_for_executive_producer()
         )
         data = loads(res.data)
@@ -582,10 +582,21 @@ class CastingAgencyTestCase(unittest.TestCase):
             ).isoformat()
         }
         headers = get_headers_for_casting_assistant()
-        actors_res = self.client().post('/actors', json=actor_data, headers=headers)
+        actors_res = self.client().post(
+            '/actors',
+            json=actor_data,
+            headers=headers
+        )
         self.assertEqual(actors_res.status_code, 401)
-        movie_data = { 'title': 'Random', 'description': 'This is a random movie' }
-        movies_res = self.client().post('/movies', json=movie_data, headers=headers)
+        movie_data = {
+            'title': 'Random',
+            'description': 'This is a random movie'
+        }
+        movies_res = self.client().post(
+            '/movies',
+            json=movie_data,
+            headers=headers
+        )
         self.assertEqual(movies_res.status_code, 401)
 
     def test_director_role_can_crud_actor_data(self):
@@ -676,6 +687,7 @@ class CastingAgencyTestCase(unittest.TestCase):
 
         delete_res = self.client().delete('/movies/1', headers=headers)
         self.assertEqual(delete_res.status_code, 401)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
