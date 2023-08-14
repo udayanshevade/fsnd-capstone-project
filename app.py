@@ -1,13 +1,13 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
-from db import db, setup_db
+from db import db, setup_db, get_db_path
 from actors.routes import actors_blueprint
 from movies.routes import movies_blueprint
 from errors import app_error_handling
 
 
-def create_app(db_path: str = None, drop_db: bool = False):
+def init_app(db_path: str = None, drop_db: bool = False):
     # create and configure the app
     app = Flask(__name__)
 
@@ -16,6 +16,11 @@ def create_app(db_path: str = None, drop_db: bool = False):
 
     # initialize db
     setup_db(app, db_path=db_path, drop_db=drop_db)
+
+    @app.route('/healthcheck', methods=['GET'])
+    def healthcheck():
+        print('>>>> healthcheck?')
+        return 'OK', 200
 
     # register routes
     app.register_blueprint(actors_blueprint)
@@ -26,11 +31,13 @@ def create_app(db_path: str = None, drop_db: bool = False):
     return app
 
 
-def init_app():
-    app = create_app()
+def create_app():
+    db_path = get_db_path()
+    app = init_app(db_path=db_path)
     Migrate(app, db)
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    return app
 
 
 if __name__ == '__main__':
-    init_app()
+    app = create_app()
+    app.run(host='0.0.0.0', port=8080, debug=True)

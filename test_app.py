@@ -1,7 +1,7 @@
 import unittest
 from json import loads
 from datetime import datetime
-from app import create_app
+from app import init_app
 from db import db
 from test_data_factory import ActorFactory, MovieFactory
 from dotenv import dotenv_values
@@ -52,7 +52,7 @@ class CastingAgencyTestCase(unittest.TestCase):
             db_host,
             db_name)
 
-        app = create_app(db_path=self.db_path, drop_db=True)
+        app = init_app(db_path=self.db_path, drop_db=True)
 
         self.app = app
         self.client = self.app.test_client

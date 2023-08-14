@@ -20,12 +20,12 @@ def get_db_path():
     return db_path
 
 
-def configure_app(app, db_path: str = get_db_path()):
+def configure_app(app, db_path: str):
     """Configures the app with the provided settings"""
     app.config["SQLALCHEMY_DATABASE_URI"] = db_path
 
 
-def setup_db(app, db_path: str = get_db_path(), drop_db: bool = False):
+def setup_db(app, db_path: str, drop_db: bool = False):
     """Initialize the database using the provided app instance and options"""
     configure_app(app, db_path=db_path)
 
