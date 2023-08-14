@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from db import db, setup_db, get_db_path
+from migrate import setup_migrations
 from actors.routes import actors_blueprint
 from movies.routes import movies_blueprint
 from errors import app_error_handling
@@ -17,9 +18,10 @@ def init_app(db_path: str = None, drop_db: bool = False):
     # initialize db
     setup_db(app, db_path=db_path, drop_db=drop_db)
 
+    setup_migrations(app)
+
     @app.route('/healthcheck', methods=['GET'])
     def healthcheck():
-        print('>>>> healthcheck?')
         return 'OK', 200
 
     # register routes
