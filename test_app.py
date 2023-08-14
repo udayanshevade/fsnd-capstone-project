@@ -1,7 +1,8 @@
 import unittest
+from flask import Flask
 from json import loads
 from datetime import datetime
-from app import init_app
+from init import init_app
 from db import db
 from test_data_factory import ActorFactory, MovieFactory
 from dotenv import dotenv_values
@@ -52,7 +53,9 @@ class CastingAgencyTestCase(unittest.TestCase):
             db_host,
             db_name)
 
-        app = init_app(db_path=self.db_path, drop_db=True)
+        app = Flask(__name__)
+
+        init_app(app, db_path=self.db_path, drop_db=True)
 
         self.app = app
         self.client = self.app.test_client
