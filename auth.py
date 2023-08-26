@@ -1,14 +1,9 @@
 import json
-from flask import request, _request_ctx_stack
+from os import getenv
+from flask import request
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
-from dotenv import dotenv_values
-
-config = dotenv_values(".env")
-AUTH0_DOMAIN = config.get('AUTH0_DOMAIN', None)
-ALGORITHMS = config.get('ALGORITHMS', ['RS256'])
-API_AUDIENCE = config.get('API_AUDIENCE', 'http://localhost:9876')
 
 # AuthError Exception
 '''
@@ -94,7 +89,8 @@ def verify_decode_jwt(token):
             'code': 'invalid_header',
             'description': 'Authorization malformed.'
         }, 401)
-    url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
+    auth0_domain = getenv('AUTH0_DOMAIN', None)
+    url = f'https://{auth0_domain}/.well-known/jwks.json'
     jsonurl = urlopen(url)
     jwks = json.loads(jsonurl.read())
     rsa_key = {}
@@ -115,12 +111,15 @@ def verify_decode_jwt(token):
         }, 401)
 
     try:
+        auth0_domain = getenv('AUTH0_DOMAIN', None)
+        algorithms = getenv('ALGORITHMS', ['RS256'])
+        api_audience = getenv('API_AUDIENCE', 'http://localhost:9876')
         payload = jwt.decode(
             token,
             rsa_key,
-            algorithms=ALGORITHMS,
-            audience=API_AUDIENCE,
-            issuer=f'https://{AUTH0_DOMAIN}/',
+            algorithms=algorithms,
+            audience=api_audience,
+            issuer=f'https://{auth0_domain}/',
         )
         return payload
     except jwt.ExpiredSignatureError:

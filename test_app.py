@@ -1,20 +1,20 @@
 import unittest
+from os import getenv
 from flask import Flask
 from json import loads
 from datetime import datetime
 from init import init_app
 from db import db, build_db_path
 from test_data_factory import ActorFactory, MovieFactory
-from dotenv import dotenv_values
+from dotenv import load_dotenv, find_dotenv
 
 birthdate_format = '%a, %d %b %Y %H:%M:%S GMT'
 
-config = dotenv_values(".env")
-
+load_dotenv(find_dotenv('.env.test'))
 
 def get_headers_for_casting_assistant():
     """Test auth token for read-only endpoints"""
-    auth_token = config.get('CASTING_ASSISTANT_AUTH_TOKEN', '')
+    auth_token = getenv('CASTING_ASSISTANT_AUTH_TOKEN', '')
     return {
         'Authorization': 'Bearer ' + auth_token
     }
@@ -22,7 +22,7 @@ def get_headers_for_casting_assistant():
 
 def get_headers_for_casting_director():
     """Test auth token: CRUD for actors, RU for movies"""
-    auth_token = config.get('CASTING_DIRECTOR_AUTH_TOKEN', '')
+    auth_token = getenv('CASTING_DIRECTOR_AUTH_TOKEN', '')
     return {
         'Authorization': 'Bearer ' + auth_token
     }
@@ -33,7 +33,7 @@ def get_headers_for_executive_producer():
     Test auth token with all permissions
     (using this as default for testing endpoints)
     """
-    auth_token = config.get('EXECUTIVE_PRODUCER_AUTH_TOKEN', '')
+    auth_token = getenv('EXECUTIVE_PRODUCER_AUTH_TOKEN', '')
     return {
         'Authorization': 'Bearer ' + auth_token
     }
@@ -63,7 +63,7 @@ class CastingAgencyTestCase(unittest.TestCase):
         self.client = self.app.test_client
 
     def tearDown(self):
-        """Executed after reach test"""
+        """Executed after each test"""
         with self.app.app_context():
             db.session.rollback()
             pass
@@ -90,7 +90,7 @@ class CastingAgencyTestCase(unittest.TestCase):
 
     def test_expired_token(self):
         """Tests that token expiry is checked"""
-        expired_auth_token = config.get('EXPIRED_AUTH_TOKEN')
+        expired_auth_token = getenv('EXPIRED_AUTH_TOKEN', '')
         invalid_headers = {
             'Authorization': f'Bearer {expired_auth_token}'
         }
