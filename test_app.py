@@ -3,7 +3,7 @@ from flask import Flask
 from json import loads
 from datetime import datetime
 from init import init_app
-from db import db
+from db import db, build_db_path
 from test_data_factory import ActorFactory, MovieFactory
 from dotenv import dotenv_values
 
@@ -43,11 +43,13 @@ class CastingAgencyTestCase(unittest.TestCase):
     """This class represents the actor test case"""
     def setUp(self):
         """Define test variables and initialize app."""
+        db_dialect = 'postgresql'
         db_user = 'postgres'
         db_password = 'password'
         db_host = 'localhost:5432'
         db_name = 'castingagencytest'
-        self.db_path = 'postgresql://{}:{}@{}/{}'.format(
+        self.db_path = build_db_path(
+            db_dialect,
             db_user,
             db_password,
             db_host,

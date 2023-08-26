@@ -1,23 +1,27 @@
+from os import getenv
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import dotenv_values
 
 
 db = SQLAlchemy()
 
-
-def get_db_path():
-    config = dotenv_values(".env")
-    db_user = config.get('DB_USER', 'postgres')
-    db_password = config.get('DB_PASSWORD', 'password')
-    db_host = config.get('DB_HOST', 'localhost:5432')
-    db_name = config.get('DB_NAME', 'castingagency')
-    db_path = "postgresql://{}:{}@{}/{}".format(
+def build_db_path(db_dialect, db_user, db_password, db_host, db_name):
+    db_path = "{}://{}:{}@{}/{}".format(
+        db_dialect,
         db_user,
         db_password,
         db_host,
         db_name
     )
     return db_path
+
+
+def get_db_path():
+    db_dialect = getenv('DB_DIALECT', 'postgresql')
+    db_user = getenv('DB_USER', 'postgres')
+    db_password = getenv('DB_PASSWORD', 'password')
+    db_host = getenv('DB_HOST', 'localhost:5432')
+    db_name = getenv('DB_NAME', 'castingagency')
+    return build_db_path(db_dialect, db_user, db_password, db_host, db_name)
 
 
 def configure_app(app, db_path: str):
