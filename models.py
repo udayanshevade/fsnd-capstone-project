@@ -21,13 +21,6 @@ class Movie(db.Model, Model):
     title = db.Column(db.String())
     description = db.Column(db.Text())
 
-    def __repr__(self):
-        return '<Movie ID: {}, title: {}, complete: {}>'.format(
-            self.id,
-            self.title,
-            self.complete
-        )
-
     def format(self):
         return {
             'id': self.id,
@@ -41,13 +34,6 @@ class Actor(db.Model, Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String())
     birthdate = db.Column(db.Date)
-
-    def __repr__(self):
-        return '<Actor ID: {}, name: {}, birthdate: {}>'.format(
-            self.id,
-            self.name,
-            self.birthdate
-        )
 
     def format(self):
         return {
