@@ -33,8 +33,8 @@ There are three main user roles:
 
 - Set up a virtual environment: `python3 -m venv env && source env/bin/activate`
 - Install dependencies: `pip install -r requirements.txt`
-- Create a local database: `createdb castingagency`
-- Ensure app env vars are exported or defined in a `.env` file at the root directory of the project
+- Create a local database: `createdb castingagency` (with the default user/password)
+- Ensure the required env vars are exported or defined in a `.env` file at the root directory of the project
 - Run the development server: `flask run`
 - Access the local API at: http://127.0.0.1:5000
 
