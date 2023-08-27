@@ -12,7 +12,7 @@ Covers all the basic ideas from the ND, including:
 - Unit Testing
 - Deployment
 
-The API can be found live [here](https://fsnd-capstone-project-api.onrender.com).
+The API can be found live [here](https://fsnd-capstone-project-api.onrender.com/healthcheck).
 
 ## Behavior
 
